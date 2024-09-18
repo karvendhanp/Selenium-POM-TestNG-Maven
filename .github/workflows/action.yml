@@ -4,10 +4,10 @@ on:
   # This workflow runs every time a push or pull request is made to the main branch
   push:
     branches:
-      - main
+      - master
   pull_request:
     branches:
-      - main   
+      - master   
 
 jobs:
   build:

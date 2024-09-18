@@ -1,49 +1,53 @@
-
-
-name: Java CI with Maven
+name: Send Email on Job Completion
 
 on:
-
+  # This workflow runs every time a push or pull request is made to the main branch
   push:
-
-    branches: [ master ]
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
 
 jobs:
-
-  test:
-
+  build:
     runs-on: ubuntu-latest
 
     steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
 
-    - uses: actions/checkout@v2
+    - name: Run your build or tests
+      run: echo "Running tests or build steps here..."
 
-    - name: Set up JDK 11
+  send_email:
+    runs-on: ubuntu-latest
+    needs: build # Ensures that the 'build' job completes first
+    steps:
+    - name: Send email using SendGrid
+      env:
+        SENDGRID_API_KEY: ${{ secrets.SENDGRID_API_KEY }}
+        SENDGRID_FROM_EMAIL: 'testemail@exampleboe.com' # Replace with the sender email
+        SENDGRID_TO_EMAIL: 'karvendhan.it@gmail.com' # Replace with the recipient email
+      run: |
+        echo '{
+          "personalizations": [
+            {
+              "to": [{"email": "'"$SENDGRID_TO_EMAIL"'"}]
+            }
+          ],
+          "from": {"email": "'"$SENDGRID_FROM_EMAIL"'"},
+          "subject": "GitHub Actions Job Completed",
+          "content": [
+            {
+              "type": "text/plain",
+              "value": "Your GitHub Action job has been completed successfully."
+            }
+          ]
+        }' > email_payload.json
 
-      uses: actions/setup-java@v2
-
-      with:
-
-        java-version: '11'
-
-        distribution: 'temurin'
-
-        cache: maven
-
-    - name: Build with Maven
-
-      run: mvn clean test package
-
-           mkdir marketspark && cp target/*.jar marketspark
-    
-    - name: artifact
-
-      uses: actions/upload-artifact@v3
-
-      with:
-      
-
-          name: marketspark-automation-ci
-
-          path: marketspark
-
+        curl --request POST \
+          --url https://api.sendgrid.com/v3/mail/send \
+          --header "Authorization: Bearer $SENDGRID_API_KEY" \
+          --header 'Content-Type: application/json' \
+          --data @email_payload.json

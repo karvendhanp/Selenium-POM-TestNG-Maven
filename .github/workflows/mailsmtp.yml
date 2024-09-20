@@ -1,28 +1,36 @@
-            - name: Send mailer
-  # You may pin to the exact commit or the version.
-  # uses: devellany/send-mail@45dbe31722b9c29635bc9d60315d420218093c56
-  uses: devellany/send-mail@v1.0.2
+name: Send Email on Job Completion
+
+on:
+  # This workflow runs every time a push or pull request is made to the main branch
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master   
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Send email
+  uses: devellany/send-mailer@v1.0.2
   with:
-    # Enter SMTP host.
-    host: 
-    # Enter SMTP port. (defaults to 465)
-    port: # optional, default is 465
-    # Enter SMTP host account.
-    account: 
-    # Enter SMTP host account password.
-    password: 
-    # Enter sender name.
-    sender: 
-    # Enter sender mail.
-    from: 
-    # Enter recipient emails and separated with 'comma'. (The prefix 'file://' if you want to read a file)
-    to: 
-    # Enter the subject of the mail. (The prefix 'file://' if you want to read a file)
-    subject: 
-    # Enter the body of the mail. (The prefix 'file://' if you want to read a file)
-    body: 
-    # Enter Content-Type HTTP header. (defaults to 'text/plain')
-    contentType: # optional, default is text/plain
-    # Attachment files are entered as an array. Required key 'path'. (The prefix 'file://' if you want to read a file)
-    attachments: # optional
-          
+    host: smtp.google.com
+      # Optional port (defaults to 465)
+      port: 465
+      account: ${{secrets.ACCOUNT}}
+      password: ${{secrets.MAIL_PASSWORD}}
+      sender: devellany
+      from: ${{secrets.MAIL_ADDRESS}}
+      to: devellay@dico.me
+      subject: mail title.
+      body: your messages.
+      # Optional content type (defaults to text/plain)
+      contentType: text/plain
+      # Optional attachment files (JSON type. require property 'path')
+      attachments: '[{"path":"README.md"}]'
